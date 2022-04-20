@@ -72,3 +72,12 @@ Plugins/*/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+
+# Starter Content Ignored
+
+Content/StarterContent/*
+
+# VSCode Files
+/.vscode/*
+BuildingEscape.code-workspace
+
