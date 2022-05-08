@@ -34,7 +34,7 @@ protected:
 		USpringArmComponent* SpringArmComp;
 
 	UPROPERTY(EditDefaultsOnly)
-		TSubclassOf<AWeapon> CurrentWeaponClass;
+		TSubclassOf<AActor> CurrentWeaponClass;
 
 	UPROPERTY()
 		AWeapon* CurrentWeapon;
