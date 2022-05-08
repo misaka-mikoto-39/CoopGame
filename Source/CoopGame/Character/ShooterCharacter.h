@@ -8,6 +8,7 @@
 
 class UCameraComponent;
 class USpringArmComponent;
+class AWeapon;
 
 UCLASS()
 class COOPGAME_API AShooterCharacter : public ACharacter
@@ -31,11 +32,20 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 		USpringArmComponent* SpringArmComp;
-public:	
+
+	UPROPERTY(EditDefaultsOnly)
+		TSubclassOf<AWeapon> CurrentWeaponClass;
+
+	UPROPERTY()
+		AWeapon* CurrentWeapon;
+public:
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual FVector GetPawnViewLocation() const override;
 
+	void Shoot();
 };
