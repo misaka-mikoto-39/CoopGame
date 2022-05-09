@@ -16,8 +16,10 @@ public:
 	AWeapon();
 
 protected:
-	// Called when the game starts or when spawned
+
 	virtual void BeginPlay() override;
+	void PlayFireEffect(FVector TracerEndPoint);
+	virtual void Fire();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Componenents")
 		USkeletalMeshComponent* MeshComp;
@@ -29,7 +31,10 @@ protected:
 		UParticleSystem* MuzzleFlash;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
-		UParticleSystem* HitEffect;
+		UParticleSystem* DefaultHitEffect;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+		UParticleSystem* FleshHitEffect;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 		UParticleSystem* TracerEffect;
@@ -40,8 +45,17 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 		FName TracerTargetName;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+		float BaseDamage;
+
+	// RPM
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+		float RateOfFire;
+
+	FTimerHandle TimerHandle_TimeBetweenShots;
+	float LastFireTime;
+	float TimeBetweenShots;
 public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-	virtual void Fire();
+	void StartFire();
+	void StopFire();
 };
