@@ -9,6 +9,7 @@
 class UCameraComponent;
 class USpringArmComponent;
 class AWeapon;
+class UHealthComponent;
 
 UCLASS()
 class COOPGAME_API AShooterCharacter : public ACharacter
@@ -35,6 +36,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 		USpringArmComponent* SpringArmComp;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+		UHealthComponent* HealthComp;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Player")
 		TSubclassOf<AActor> CurrentWeaponClass;
 
@@ -47,10 +51,14 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Player", meta = (ClampMin = 0.1, ClampMax = 100))
 		float ZoomInterpSpeed;
 
-	bool IsWantsToZoom;
-	float ZoomedFOV;
 	UPROPERTY(VisibleDefaultsOnly, Category = "Player")
 		FName WeaponSocketName;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Player")
+		bool IsDied;
+
+	bool IsWantsToZoom;
+	float ZoomedFOV;
 public:
 
 	// Called every frame
@@ -60,6 +68,8 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual FVector GetPawnViewLocation() const override;
 
+	UFUNCTION()
+		void OnHealthChanged(UHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 	void StartFire();
 	void StopFire();
 };

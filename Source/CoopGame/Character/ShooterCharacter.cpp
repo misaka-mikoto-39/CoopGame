@@ -4,7 +4,10 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "CoopGame/Actor/Weapon.h"
+#include "CoopGame/Components/HealthComponent.h"
+#include "CoopGame/CoopGame.h"
 
 // Sets default values
 AShooterCharacter::AShooterCharacter()
@@ -18,12 +21,29 @@ AShooterCharacter::AShooterCharacter()
 
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp);
-
+	HealthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComp"));
 	//enable crouch
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
+	GetCapsuleComponent()->SetCollisionResponseToChannel(COLLISION_WEAPON, ECR_Ignore);
 	WeaponSocketName = "weapon_socket";
 	ZoomedFOV = 65.0f;
 	ZoomInterpSpeed = 20;
+	IsDied = false;
+}
+
+// Called when the game starts or when spawned
+void AShooterCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	//spawn weapon
+	CurrentWeapon = GetWorld()->SpawnActor<AWeapon>(CurrentWeaponClass);
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, WeaponSocketName);
+		CurrentWeapon->SetOwner(this);
+	}
+	DefaultFOV = CameraComp->FieldOfView;
+	HealthComp->OnHealthChanged.AddDynamic(this, &AShooterCharacter::OnHealthChanged);
 }
 
 void AShooterCharacter::MoveForward(float Value)
@@ -54,20 +74,6 @@ void AShooterCharacter::BeginZoom()
 void AShooterCharacter::EndZoom()
 {
 	IsWantsToZoom = false;
-}
-
-// Called when the game starts or when spawned
-void AShooterCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-	//spawn weapon
-	CurrentWeapon = GetWorld()->SpawnActor<AWeapon>(CurrentWeaponClass);
-	if (CurrentWeapon)
-	{
-		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, WeaponSocketName);
-		CurrentWeapon->SetOwner(this);
-	}
-	DefaultFOV = CameraComp->FieldOfView;
 }
 
 // Called every frame
@@ -103,6 +109,18 @@ FVector AShooterCharacter::GetPawnViewLocation() const
 		return CameraComp->GetComponentLocation();
 	}
 	return Super::GetPawnViewLocation();
+}
+
+void AShooterCharacter::OnHealthChanged(UHealthComponent* OwningHealthComp, float Health, float HealthDelta, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
+{
+	if (Health <= 0 && !IsDied)
+	{
+		IsDied = true;
+		GetMovementComponent()->StopMovementImmediately();
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		DetachFromControllerPendingDestroy();
+		SetLifeSpan(10.0f);
+	}
 }
 
 void AShooterCharacter::StartFire()
