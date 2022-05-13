@@ -42,7 +42,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Player")
 		TSubclassOf<AActor> CurrentWeaponClass;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 		AWeapon* CurrentWeapon;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Player")
@@ -54,7 +54,7 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, Category = "Player")
 		FName WeaponSocketName;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Player")
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Player")
 		bool IsDied;
 
 	bool IsWantsToZoom;

@@ -6,6 +6,18 @@
 #include "GameFramework/Actor.h"
 #include "Weapon.generated.h"
 
+USTRUCT()
+struct FHitScanTrace
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY()
+		TEnumAsByte<EPhysicalSurface> SurfaceType;
+
+	UPROPERTY()
+		FVector_NetQuantize TraceTo;
+};
+
 UCLASS()
 class COOPGAME_API AWeapon : public AActor
 {
@@ -19,7 +31,14 @@ protected:
 
 	virtual void BeginPlay() override;
 	void PlayFireEffect(FVector TracerEndPoint);
+	void PlayHitEffect(EPhysicalSurface SurfaceType, FVector HitPoint);
 	virtual void Fire();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+		void Server_Fire();
+
+	UFUNCTION()
+		void OnRep_HitScanTrace();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Componenents")
 		USkeletalMeshComponent* MeshComp;
@@ -52,9 +71,13 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 		float RateOfFire;
 
+	UPROPERTY(ReplicatedUsing = OnRep_HitScanTrace)
+		FHitScanTrace HitScanTrace;
+
 	FTimerHandle TimerHandle_TimeBetweenShots;
 	float LastFireTime;
 	float TimeBetweenShots;
+
 public:
 	void StartFire();
 	void StopFire();

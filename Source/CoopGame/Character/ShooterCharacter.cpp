@@ -8,6 +8,7 @@
 #include "CoopGame/Actor/Weapon.h"
 #include "CoopGame/Components/HealthComponent.h"
 #include "CoopGame/CoopGame.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 AShooterCharacter::AShooterCharacter()
@@ -36,12 +37,16 @@ void AShooterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	//spawn weapon
-	CurrentWeapon = GetWorld()->SpawnActor<AWeapon>(CurrentWeaponClass);
-	if (CurrentWeapon)
+	if (GetLocalRole() == ROLE_Authority)
 	{
-		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, WeaponSocketName);
-		CurrentWeapon->SetOwner(this);
+		CurrentWeapon = GetWorld()->SpawnActor<AWeapon>(CurrentWeaponClass);
+		if (CurrentWeapon)
+		{
+			CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, WeaponSocketName);
+			CurrentWeapon->SetOwner(this);
+		}
 	}
+
 	DefaultFOV = CameraComp->FieldOfView;
 	HealthComp->OnHealthChanged.AddDynamic(this, &AShooterCharacter::OnHealthChanged);
 }
@@ -119,6 +124,8 @@ void AShooterCharacter::OnHealthChanged(UHealthComponent* OwningHealthComp, floa
 		GetMovementComponent()->StopMovementImmediately();
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		DetachFromControllerPendingDestroy();
+		CurrentWeapon->SetActorEnableCollision(false);
+		CurrentWeapon->SetLifeSpan(10.0f);
 		SetLifeSpan(10.0f);
 	}
 }
@@ -136,4 +143,10 @@ void AShooterCharacter::StopFire()
 	{
 		CurrentWeapon->StopFire();
 	}
+}
+void AShooterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AShooterCharacter, CurrentWeapon);
+	DOREPLIFETIME(AShooterCharacter, IsDied);
 }
