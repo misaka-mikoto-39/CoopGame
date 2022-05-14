@@ -8,6 +8,7 @@
 #include "CoopGame/Components/HealthComponent.h"
 #include "CoopGame/Character/ShooterCharacter.h"
 #include "Components/SphereComponent.h"
+#include "Sound/SoundCue.h"
 
 // Sets default values
 ATrackerBot::ATrackerBot()
@@ -37,15 +38,18 @@ ATrackerBot::ATrackerBot()
 	ExplosionRadius = 200.0f;
 	IsExploded = false;
 	IsStartedSelfDestruct = false;
-	SelfDamage = 10.0f;
-	SelfDamageRate = 0.5f;
+	SelfDamage = 20.0f;
+	SelfDamageRate = 0.25f;
 }
 
 // Called when the game starts or when spawned
 void ATrackerBot::BeginPlay()
 {
 	Super::BeginPlay();
-	NextPathPoint = GetNextPathPoint();
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		NextPathPoint = GetNextPathPoint();
+	}
 }
 
 FVector ATrackerBot::GetNextPathPoint()
@@ -75,6 +79,10 @@ void ATrackerBot::SelfDestruct()
 	UGameplayStatics::ApplyRadialDamage(this, ExplosionBaseDamage, GetActorLocation(), ExplosionRadius, nullptr, IgnoreActors, this, GetInstigatorController(), true);
 
 	DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 12, FColor::Red, false, 2.0f, 0, 1.0f);
+	if (ExplodeSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ExplodeSound, GetActorLocation());
+	}
 
 	Destroy();
 }
@@ -104,22 +112,25 @@ void ATrackerBot::HandleOnHealthChanged(UHealthComponent* OwningHealthComp, floa
 void ATrackerBot::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	float DistanceToTarget = (GetActorLocation() - NextPathPoint).Size();
-	if (DistanceToTarget <= RequiredDistanceToTarget)
+	if (GetLocalRole() == ROLE_Authority)
 	{
-		NextPathPoint = GetNextPathPoint();
-	}
-	else
-	{
-		//keep moving to next target
-		FVector ForceDirection = NextPathPoint - GetActorLocation();
-		ForceDirection.Normalize();
-		ForceDirection *= MovementForce;
+		float DistanceToTarget = (GetActorLocation() - NextPathPoint).Size();
+		if (DistanceToTarget <= RequiredDistanceToTarget)
+		{
+			NextPathPoint = GetNextPathPoint();
+		}
+		else
+		{
+			//keep moving to next target
+			FVector ForceDirection = NextPathPoint - GetActorLocation();
+			ForceDirection.Normalize();
+			ForceDirection *= MovementForce;
 
-		MeshComp->AddForce(ForceDirection, NAME_None, IsUseVelocityChange);
-		DrawDebugDirectionalArrow(GetWorld(), GetActorLocation(), GetActorLocation() + ForceDirection, 32, FColor::Cyan, false, 0.0f, 0, 1.0f);
+			MeshComp->AddForce(ForceDirection, NAME_None, IsUseVelocityChange);
+			//DrawDebugDirectionalArrow(GetWorld(), GetActorLocation(), GetActorLocation() + ForceDirection, 32, FColor::Cyan, false, 0.0f, 0, 1.0f);
+		}
+		//DrawDebugSphere(GetWorld(), NextPathPoint, 20, 12, FColor::Cyan, false, 0.0f, 1.0f);
 	}
-	DrawDebugSphere(GetWorld(), NextPathPoint, 20, 12, FColor::Cyan, false, 0.0f, 1.0f);
 }
 
 void ATrackerBot::NotifyActorBeginOverlap(AActor* OtherActor)
@@ -133,5 +144,9 @@ void ATrackerBot::NotifyActorBeginOverlap(AActor* OtherActor)
 	{
 		GetWorldTimerManager().SetTimer(TimerHandle_SelfDamage, this, &ATrackerBot::DamageSelf, SelfDamageRate, true, 0.0f);
 		IsStartedSelfDestruct = true;
+		if (SelfDestructSound)
+		{
+			UGameplayStatics::SpawnSoundAttached(SelfDestructSound, RootComponent);
+		}
 	}
 }

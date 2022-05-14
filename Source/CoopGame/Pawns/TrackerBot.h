@@ -8,6 +8,7 @@
 
 class UHealthComponent;
 class USphereComponent;
+class USoundCue;
 
 UCLASS()
 class COOPGAME_API ATrackerBot : public APawn
@@ -66,9 +67,15 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Tracker Bot")
 		float SelfDamageRate;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Tracker Bot")
 		float SelfDamage;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Tracker Bot")
+		USoundCue* SelfDestructSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Tracker Bot")
+		USoundCue* ExplodeSound;
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
