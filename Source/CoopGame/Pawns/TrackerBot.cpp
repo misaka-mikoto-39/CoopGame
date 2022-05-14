@@ -70,21 +70,28 @@ void ATrackerBot::SelfDestruct()
 		return;
 	}
 	IsExploded = true;
+
 	if (ExplosionEffect)
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
 	}
-	TArray<AActor*> IgnoreActors;
-	IgnoreActors.Add(this);
-	UGameplayStatics::ApplyRadialDamage(this, ExplosionBaseDamage, GetActorLocation(), ExplosionRadius, nullptr, IgnoreActors, this, GetInstigatorController(), true);
-
-	DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 12, FColor::Red, false, 2.0f, 0, 1.0f);
 	if (ExplodeSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, ExplodeSound, GetActorLocation());
 	}
+	MeshComp->SetVisibility(false, true);
+	MeshComp->SetSimulatePhysics(false);
+	MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		TArray<AActor*> IgnoreActors;
+		IgnoreActors.Add(this);
+		UGameplayStatics::ApplyRadialDamage(this, ExplosionBaseDamage, GetActorLocation(), ExplosionRadius, nullptr, IgnoreActors, this, GetInstigatorController(), true);
 
-	Destroy();
+		DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 12, FColor::Red, false, 2.0f, 0, 1.0f);
+
+		SetLifeSpan(2.0f);
+	}
 }
 
 void ATrackerBot::DamageSelf()
@@ -112,7 +119,7 @@ void ATrackerBot::HandleOnHealthChanged(UHealthComponent* OwningHealthComp, floa
 void ATrackerBot::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (GetLocalRole() == ROLE_Authority)
+	if (GetLocalRole() == ROLE_Authority && !IsExploded)
 	{
 		float DistanceToTarget = (GetActorLocation() - NextPathPoint).Size();
 		if (DistanceToTarget <= RequiredDistanceToTarget)
@@ -135,14 +142,17 @@ void ATrackerBot::Tick(float DeltaTime)
 
 void ATrackerBot::NotifyActorBeginOverlap(AActor* OtherActor)
 {
-	if (IsStartedSelfDestruct)
+	if (IsStartedSelfDestruct || IsExploded)
 	{
 		return;
 	}
 	AShooterCharacter* PlayerPawn = Cast<AShooterCharacter>(OtherActor);
 	if (PlayerPawn)
 	{
-		GetWorldTimerManager().SetTimer(TimerHandle_SelfDamage, this, &ATrackerBot::DamageSelf, SelfDamageRate, true, 0.0f);
+		if (GetLocalRole() == ROLE_Authority)
+		{
+			GetWorldTimerManager().SetTimer(TimerHandle_SelfDamage, this, &ATrackerBot::DamageSelf, SelfDamageRate, true, 0.0f);
+		}
 		IsStartedSelfDestruct = true;
 		if (SelfDestructSound)
 		{

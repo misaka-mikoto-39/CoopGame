@@ -71,7 +71,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 		float RateOfFire;
 
-	UPROPERTY(ReplicatedUsing = OnRep_HitScanTrace)
+	UPROPERTY(ReplicatedUsing=OnRep_HitScanTrace)
 		FHitScanTrace HitScanTrace;
 
 	FTimerHandle TimerHandle_TimeBetweenShots;
