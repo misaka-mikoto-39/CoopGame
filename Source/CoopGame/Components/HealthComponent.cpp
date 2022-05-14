@@ -42,6 +42,17 @@ void UHealthComponent::OnRep_Health(float OldHealth)
 	float Damage = OldHealth - Health;
 	OnHealthChanged.Broadcast(this, Health, Damage, nullptr, nullptr, nullptr);
 }
+
+void UHealthComponent::Heal(float Amount)
+{
+	if (Amount <= 0.0f || Health <= 0.0f)
+	{
+		return;
+	}
+	Health = FMath::Clamp(Health + Amount, 0.0f, DefaultHealth);
+	OnHealthChanged.Broadcast(this, Health, -Amount, nullptr, nullptr, nullptr);
+}
+
 void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
