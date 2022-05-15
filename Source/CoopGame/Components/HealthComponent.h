@@ -18,21 +18,28 @@ public:
 	UHealthComponent();
 
 protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
+
+	bool IsDead;
 
 	UPROPERTY(ReplicatedUsing = OnRep_Health, BlueprintReadOnly, Category = "HealthComponent")
 		float Health;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HealthComponent")
 		float DefaultHealth;
+
+protected:
+	// Called when the game starts
+	virtual void BeginPlay() override;
 	UFUNCTION()
 		void HandleOnTakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 	UFUNCTION()
 		void OnRep_Health(float OldHealth);
+
 public:
-	UPROPERTY(BlueprintAssignable, VisibleAnywhere)
+	UPROPERTY(BlueprintAssignable, VisibleAnywhere, Category = "Events")
 		FOnHealthChangedSignature OnHealthChanged;
 
+public:
+	float GetHealth() const;
 	UFUNCTION(BlueprintCallable, Category = "HealthComponent")
 		void Heal(float Amount);
 };

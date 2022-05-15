@@ -24,6 +24,7 @@ AWeapon::AWeapon()
 	SetReplicates(true);
 	NetUpdateFrequency = 66.0f;
 	MinNetUpdateFrequency = 33.0f;
+	WeaponRange = 10000;
 }
 
 void AWeapon::BeginPlay()
@@ -89,7 +90,7 @@ void AWeapon::Fire()
 		FRotator EyeRotation;
 		MyOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
 		FVector ShootDirection = EyeRotation.Vector();
-		FVector TraceEnd = EyeLocation + (EyeRotation.Vector() * 1000);
+		FVector TraceEnd = EyeLocation + (EyeRotation.Vector() * WeaponRange);
 		FCollisionQueryParams QueryParams;
 		QueryParams.AddIgnoredActor(MyOwner);
 		QueryParams.AddIgnoredActor(this);

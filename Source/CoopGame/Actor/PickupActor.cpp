@@ -4,6 +4,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/DecalComponent.h"
 #include "PowerupActor.h"
+#include "CoopGame/Character/ShooterCharacter.h"
 
 // Sets default values
 APickupActor::APickupActor()
@@ -43,11 +44,14 @@ void APickupActor::ReSpawn()
 void APickupActor::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
-
+	/*AShooterCharacter* SC = Cast<AShooterCharacter>(OtherActor);
+	if (SC && SC->IsPlayerControlled())
+	{*/
 	if (GetLocalRole() == ROLE_Authority && PowerupInstance)
 	{
 		PowerupInstance->ActivatePowerup(OtherActor);
 		PowerupInstance = nullptr;
 		GetWorldTimerManager().SetTimer(TimerHandle_RespawnPowerup, this, &APickupActor::ReSpawn, CooldownDuration);
 	}
+	//}
 }
