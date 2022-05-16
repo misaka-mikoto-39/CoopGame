@@ -48,19 +48,45 @@ void ATrackerBot::BeginPlay()
 	Super::BeginPlay();
 	if (GetLocalRole() == ROLE_Authority)
 	{
-		NextPathPoint = GetNextPathPoint();
+		RefreshPathPoint();
 	}
 }
 
 FVector ATrackerBot::GetNextPathPoint()
 {
-	ACharacter* PlayerPawn = UGameplayStatics::GetPlayerCharacter(this, 0);
-	UNavigationPath* NavPath = UNavigationSystemV1::FindPathToActorSynchronously(this, GetActorLocation(), PlayerPawn);
-	if (NavPath && NavPath->PathPoints.Num() > 1)
+	AActor* NearestTarget = nullptr;
+	float NearestDistance = FLT_MAX;
+	for (auto it = GetWorld()->GetPawnIterator(); it; ++it)
 	{
-		return NavPath->PathPoints[1];
+		APawn* TestPawn = it->Get();
+		if (TestPawn == nullptr || UHealthComponent::IsFriendly(this, TestPawn))
+		{
+			continue;
+		}
+		float DistanceCheck = (TestPawn->GetActorLocation() - this->GetActorLocation()).Size();
+		if (DistanceCheck < NearestDistance)
+		{
+			NearestDistance = DistanceCheck;
+			NearestTarget = TestPawn;
+		}
+	}
+	if (NearestTarget)
+	{
+		UNavigationPath* NavPath = UNavigationSystemV1::FindPathToActorSynchronously(this, GetActorLocation(), NearestTarget);
+		GetWorldTimerManager().ClearTimer(TimerHandle_RefreshPath);
+		GetWorldTimerManager().SetTimer(TimerHandle_RefreshPath, this, &ATrackerBot::RefreshPathPoint, 5.0, false);
+
+		if (NavPath && NavPath->PathPoints.Num() > 1)
+		{
+			return NavPath->PathPoints[1];
+		}
 	}
 	return GetActorLocation();
+}
+
+void ATrackerBot::RefreshPathPoint()
+{
+	NextPathPoint = GetNextPathPoint();
 }
 
 void ATrackerBot::SelfDestruct()
@@ -149,7 +175,7 @@ void ATrackerBot::NotifyActorBeginOverlap(AActor* OtherActor)
 		return;
 	}
 	AShooterCharacter* PlayerPawn = Cast<AShooterCharacter>(OtherActor);
-	if (PlayerPawn)
+	if (PlayerPawn && !UHealthComponent::IsFriendly(this, OtherActor))
 	{
 		if (GetLocalRole() == ROLE_Authority)
 		{

@@ -32,6 +32,7 @@ void AShooterGameMode::EndWave()
 void AShooterGameMode::PrepareForNextWave()
 {
 	GetWorldTimerManager().SetTimer(TimerHandle_NextWaveStart, this, &AShooterGameMode::StartWave, TimeBetweenWave, false);
+	RespawnDeadPlayer();
 	SetWaveState(EWaveState::WaitingToStart);
 }
 
@@ -61,8 +62,8 @@ void AShooterGameMode::CheckWaveState()
 			continue;
 		}
 
-		UHealthComponent* HealthComp = Cast<UHealthComponent>(TestPawn->GetComponentByClass(UHealthComponent::StaticClass()));
-		if (HealthComp && HealthComp->GetHealth() > 0.0f)
+		UHealthComponent* TestPawnHealthComp = Cast<UHealthComponent>(TestPawn->GetComponentByClass(UHealthComponent::StaticClass()));
+		if (TestPawnHealthComp && TestPawnHealthComp->GetHealth() > 0.0f)
 		{
 			IsAnyBotAlive = true;
 			break;
@@ -116,6 +117,18 @@ void AShooterGameMode::SetWaveState(EWaveState NewState)
 	if (ensureAlways(GS))
 	{
 		GS->SetWaveState(NewState);
+	}
+}
+
+void AShooterGameMode::RespawnDeadPlayer()
+{
+	for (auto it = GetWorld()->GetPlayerControllerIterator(); it; ++it)
+	{
+		APlayerController* PC = it->Get();
+		if (PC && PC->GetPawn() == nullptr)
+		{
+			RestartPlayer(PC);
+		}
 	}
 }
 

@@ -77,6 +77,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 		float WeaponRange;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon", meta = (ClampMin = 0.0f))
+		float BulletSpread;
+
 	FTimerHandle TimerHandle_TimeBetweenShots;
 	float LastFireTime;
 	float TimeBetweenShots;

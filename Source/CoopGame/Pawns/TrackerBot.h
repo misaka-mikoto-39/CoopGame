@@ -23,8 +23,12 @@ protected:
 	// Called when the game starts or when spawned
 
 	virtual void BeginPlay() override;
-	FVector GetNextPathPoint();
 	void SelfDestruct();
+
+	FVector GetNextPathPoint();
+
+	UFUNCTION()
+		void RefreshPathPoint();
 
 	UFUNCTION()
 		void DamageSelf();
@@ -37,6 +41,7 @@ protected:
 	bool IsExploded;
 	bool IsStartedSelfDestruct;
 	FTimerHandle TimerHandle_SelfDamage;
+	FTimerHandle TimerHandle_RefreshPath;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Components")
 		UStaticMeshComponent* MeshComp;

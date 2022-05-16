@@ -11,6 +11,7 @@ UHealthComponent::UHealthComponent()
 	DefaultHealth = 100;
 	IsDead = false;
 	SetIsReplicated(true);
+	TeamNum = 255;
 }
 
 // Called when the game starts
@@ -33,6 +34,10 @@ void UHealthComponent::BeginPlay()
 void UHealthComponent::HandleOnTakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
 	if (Damage <= 0.0f || IsDead)
+	{
+		return;
+	}
+	if (DamagedActor != DamageCauser && UHealthComponent::IsFriendly(DamagedActor, DamageCauser))
 	{
 		return;
 	}
@@ -74,4 +79,21 @@ void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UHealthComponent, Health);
+}
+
+bool UHealthComponent::IsFriendly(AActor* ActorA, AActor* ActorB)
+{
+	if (ActorA == nullptr || ActorB == nullptr)
+	{
+		return true;
+	}
+
+	UHealthComponent* HealCompA = Cast<UHealthComponent>(ActorA->GetComponentByClass(UHealthComponent::StaticClass()));
+	UHealthComponent* HealCompB = Cast<UHealthComponent>(ActorB->GetComponentByClass(UHealthComponent::StaticClass()));
+
+	if (HealCompA == nullptr || HealCompB == nullptr)
+	{
+		return true;
+	}
+	return (HealCompA->TeamNum == HealCompB->TeamNum);
 }

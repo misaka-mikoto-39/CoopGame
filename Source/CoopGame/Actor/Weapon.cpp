@@ -8,6 +8,7 @@
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "CoopGame/CoopGame.h"
 #include "Net/UnrealNetwork.h"
+#include "CoopGame/Components/HealthComponent.h"
 
 static int32 DebugWeaponDrawing = 0;
 FAutoConsoleVariableRef CVARDebugWeaponDrawing(TEXT("COOP.DebugWeapons"), DebugWeaponDrawing, TEXT("Draw Debug Lines for Weapons"), ECVF_Cheat);
@@ -22,9 +23,10 @@ AWeapon::AWeapon()
 	BaseDamage = 20.0f;
 	RateOfFire = 600;
 	SetReplicates(true);
+	WeaponRange = 10000;
+	BulletSpread = 2.0f;
 	NetUpdateFrequency = 66.0f;
 	MinNetUpdateFrequency = 33.0f;
-	WeaponRange = 10000;
 }
 
 void AWeapon::BeginPlay()
@@ -90,6 +92,9 @@ void AWeapon::Fire()
 		FRotator EyeRotation;
 		MyOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
 		FVector ShootDirection = EyeRotation.Vector();
+
+		float HalfRad = FMath::DegreesToRadians(BulletSpread);
+		ShootDirection = FMath::VRandCone(ShootDirection, HalfRad, HalfRad);
 		FVector TraceEnd = EyeLocation + (EyeRotation.Vector() * WeaponRange);
 		FCollisionQueryParams QueryParams;
 		QueryParams.AddIgnoredActor(MyOwner);
@@ -111,7 +116,7 @@ void AWeapon::Fire()
 				{
 					ActualDamage *= 4.0f;
 				}
-				UGameplayStatics::ApplyPointDamage(HitActor, ActualDamage, ShootDirection, Hit, MyOwner->GetInstigatorController(), this, DamageType);
+				UGameplayStatics::ApplyPointDamage(HitActor, ActualDamage, ShootDirection, Hit, MyOwner->GetInstigatorController(), MyOwner, DamageType);
 			}
 			PlayHitEffect(SurfaceType, Hit.ImpactPoint);
 			TracerEndPoint = Hit.ImpactPoint;

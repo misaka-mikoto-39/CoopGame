@@ -33,6 +33,7 @@ protected:
 	void GameOver();
 	EWaveState GetWaveState();
 	void SetWaveState(EWaveState NewState);
+	void RespawnDeadPlayer();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "GameMode")
 		void SpawnNewBot();
