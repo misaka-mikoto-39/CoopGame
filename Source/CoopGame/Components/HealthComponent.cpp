@@ -2,7 +2,7 @@
 
 #include "HealthComponent.h"
 #include "CoopGame/Character/ShooterCharacter.h"
-#include "CoopGame/GameModes/ShooterGameMode.h"
+#include "CoopGame/Game/ShooterGameMode.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
