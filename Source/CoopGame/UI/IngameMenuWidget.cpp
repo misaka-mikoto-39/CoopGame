@@ -15,6 +15,7 @@ bool UIngameMenuWidget::Initialize()
 	{
 		QuitButton->OnClicked.AddDynamic(this, &UIngameMenuWidget::OnClick_QuitButton);
 	}
+	bIsFocusable = true;
 	return true;
 }
 

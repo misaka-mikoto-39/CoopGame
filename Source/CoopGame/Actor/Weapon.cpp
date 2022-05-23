@@ -22,7 +22,7 @@ AWeapon::AWeapon()
 	TracerTargetName = "BeamEnd";
 	BaseDamage = 20.0f;
 	RateOfFire = 600;
-	SetReplicates(true);
+	bReplicates = true;
 	WeaponRange = 10000;
 	BulletSpread = 2.0f;
 	NetUpdateFrequency = 66.0f;

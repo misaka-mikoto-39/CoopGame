@@ -2,16 +2,19 @@
 
 #include "CoopGameInstance.h"
 #include "Blueprint/UserWidget.h"
+#include "GameFramework/GameUserSettings.h"
+#include "OnlineSessionSettings.h"
+#include "Interfaces/OnlineSessionInterface.h"
+
 #include "CoopGame/UI/MainMenuWidget.h"
 #include "CoopGame/UI/IngameMenuWidget.h"
-#include "GameFramework/GameUserSettings.h"
 
 UCoopGameInstance::UCoopGameInstance(const FObjectInitializer& ObjectIniyializer)
 {
-	ConstructorHelpers::FClassFinder<UUserWidget> MenuBPClass(TEXT("/Game/UI/MainMenu/WBP_MainMenu"));
-	if (MenuBPClass.Class != nullptr)
+	ConstructorHelpers::FClassFinder<UUserWidget> MainMenuBPClass(TEXT("/Game/UI/MainMenu/WBP_MainMenu"));
+	if (MainMenuBPClass.Class != nullptr)
 	{
-		MenuClass = MenuBPClass.Class;
+		MainMenuClass = MainMenuBPClass.Class;
 	}
 
 	ConstructorHelpers::FClassFinder<UUserWidget> IngameMenuBPClass(TEXT("/Game/UI/IngameMenu/WBP_IngameMenu"));
@@ -23,17 +26,87 @@ UCoopGameInstance::UCoopGameInstance(const FObjectInitializer& ObjectIniyializer
 
 void UCoopGameInstance::Init()
 {
+	IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
+	if (Subsystem)
+	{
+		SessionInterface = Subsystem->GetSessionInterface();
+		if (SessionInterface)
+		{
+			SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UCoopGameInstance::OnCreateSessionComplete);
+			SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UCoopGameInstance::OnDestroySessionComplete);
+			SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UCoopGameInstance::OnFindSessionComplete);
+		}
+	}
 }
 
-void UCoopGameInstance::LoadMenu()
+void UCoopGameInstance::RefreshServerList()
 {
-	if (MenuClass)
+	SessionSearch = MakeShareable(new FOnlineSessionSearch());
+	if (SessionSearch)
 	{
-		UMainMenuWidget* Menu = CreateWidget<UMainMenuWidget>(this, MenuClass);
-		if (Menu)
+		SessionSearch->bIsLanQuery = true;
+		SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
+	}
+}
+
+void UCoopGameInstance::CreateSession(FName SessionName)
+{
+	if (SessionInterface)
+	{
+		FOnlineSessionSettings SessionSettings;
+		SessionSettings.bIsLANMatch = true;
+		SessionSettings.NumPublicConnections = 2;
+		SessionSettings.bShouldAdvertise = true;
+		SessionInterface->CreateSession(0, SessionName, SessionSettings);
+	}
+}
+
+void UCoopGameInstance::OnCreateSessionComplete(FName SessionName, bool IsSuccess)
+{
+	if (IsSuccess)
+	{
+		UWorld* World = GetWorld();
+		if (World)
 		{
-			Menu->Setup();
-			Menu->SetMenuInterface(this);
+			World->ServerTravel("/Game/Map/Lobby?listen");
+		}
+	}
+}
+
+void UCoopGameInstance::OnDestroySessionComplete(FName SessionName, bool IsSuccess)
+{
+	if (IsSuccess)
+	{
+		CreateSession(SessionName);
+	}
+}
+
+void UCoopGameInstance::OnFindSessionComplete(bool IsSuccess)
+{
+	if (IsSuccess && SessionSearch && MainMenu)
+	{
+		TArray<FOnlineSessionSearchResult> SearchResults = SessionSearch->SearchResults;
+		if (SearchResults.Num() > 0)
+		{
+			TArray<FString> ServerNames;
+			for (const FOnlineSessionSearchResult& Result : SearchResults)
+			{
+				ServerNames.Add(Result.GetSessionIdStr());
+			}
+			MainMenu->SetServerList(ServerNames);
+		}
+	}
+}
+
+void UCoopGameInstance::LoadMainMenu()
+{
+	if (MainMenuClass)
+	{
+		MainMenu = CreateWidget<UMainMenuWidget>(this, MainMenuClass);
+		if (MainMenu)
+		{
+			MainMenu->Setup();
+			MainMenu->SetMenuInterface(this);
 		}
 	}
 }
@@ -53,14 +126,18 @@ void UCoopGameInstance::LoadIngameMenu()
 
 void UCoopGameInstance::Host()
 {
-	if (GEngine)
+	if (SessionInterface)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Hosting Server"));
-	}
-	UWorld* World = GetWorld();
-	if (World)
-	{
-		World->ServerTravel("/Game/Map/NewMap?listen");
+		FName SessionName = TEXT("My Session Game");
+		FNamedOnlineSession* ExistingSession = SessionInterface->GetNamedSession(SessionName);
+		if (ExistingSession)
+		{
+			SessionInterface->DestroySession(SessionName);
+		}
+		else
+		{
+			CreateSession(SessionName);
+		}
 	}
 }
 
@@ -70,11 +147,12 @@ void UCoopGameInstance::Join(const FString& Address)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Joining ") + Address);
 	}
-	APlayerController* PC = GetFirstLocalPlayerController();
+
+	/*APlayerController* PC = GetFirstLocalPlayerController();
 	if (PC)
 	{
 		PC->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
-	}
+	}*/
 }
 
 void UCoopGameInstance::Leave()

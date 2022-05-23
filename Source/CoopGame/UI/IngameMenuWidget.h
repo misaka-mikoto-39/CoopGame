@@ -17,12 +17,12 @@ class COOPGAME_API UIngameMenuWidget : public UUserWidget
 	GENERATED_BODY()
 private:
 	IMenuInterface* MenuInterface;
-protected:
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-		UButton* CancelButton;
 
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(meta = (BindWidget))
+		UButton* CancelButton;
+	UPROPERTY(meta = (BindWidget))
 		UButton* QuitButton;
+protected:
 
 	virtual void OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld) override;
 

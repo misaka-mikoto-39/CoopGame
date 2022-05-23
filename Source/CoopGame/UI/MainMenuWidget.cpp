@@ -4,6 +4,16 @@
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
 #include "Components/EditableTextBox.h"
+#include "ServerRowWidget.h"
+
+UMainMenuWidget::UMainMenuWidget(const FObjectInitializer& ObjectIniyializer) : UUserWidget(ObjectIniyializer)
+{
+	ConstructorHelpers::FClassFinder<UUserWidget> ServerRowBPClass(TEXT("/Game/UI/MainMenu/WBP_ServerRowWidget"));
+	if (ServerRowBPClass.Class != nullptr)
+	{
+		ServerRowClass = ServerRowBPClass.Class;
+	}
+}
 
 bool UMainMenuWidget::Initialize()
 {
@@ -29,6 +39,7 @@ bool UMainMenuWidget::Initialize()
 	{
 		JoinButton->OnClicked.AddDynamic(this, &UMainMenuWidget::OnClick_JoinButton);
 	}
+	bIsFocusable = true;
 	return true;
 }
 
@@ -79,8 +90,9 @@ void UMainMenuWidget::OnClick_JoinMenuButton()
 {
 	if (MenuSwitcher)
 	{
-		if (JoinMenu)
+		if (JoinMenu && MenuInterface)
 		{
+			MenuInterface->RefreshServerList();
 			MenuSwitcher->SetActiveWidget(JoinMenu);
 		}
 	}
@@ -114,14 +126,27 @@ void UMainMenuWidget::OnClick_JoinButton()
 {
 	if (MenuInterface)
 	{
-		FString IP;
-		if (IPAddressText)
+		MenuInterface->Join("");
+	}
+}
+
+void UMainMenuWidget::SetServerList(TArray<FString> ServerNames)
+{
+	UWorld* World = this->GetWorld();
+	if (World && ServerList)
+	{
+		ServerList->ClearChildren();
+		for (const FString& ServerName : ServerNames)
 		{
-			IP = IPAddressText->GetText().ToString();
-		}
-		if (!IP.IsEmpty())
-		{
-			MenuInterface->Join(IP);
+			if (ServerRowClass)
+			{
+				UServerRowWidget* Row = CreateWidget<UServerRowWidget>(World, ServerRowClass);
+				if (Row)
+				{
+					Row->SetServerText(FText::FromString(ServerName));
+					ServerList->AddChild(Row);
+				}
+			}
 		}
 	}
 }

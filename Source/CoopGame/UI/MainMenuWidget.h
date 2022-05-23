@@ -17,35 +17,29 @@ UCLASS()
 class COOPGAME_API UMainMenuWidget : public UUserWidget
 {
 	GENERATED_BODY()
+private:
+	TSubclassOf<UUserWidget> ServerRowClass;
 
+	UPROPERTY(meta = (BindWidget))
+		UButton* HostButton;
+	UPROPERTY(meta = (BindWidget))
+		UButton* JoinMenuButton;
+	UPROPERTY(meta = (BindWidget))
+		UButton* QuitButton;
+	UPROPERTY(meta = (BindWidget))
+		UButton* CancelButton;
+	UPROPERTY(meta = (BindWidget))
+		UButton* JoinButton;
+	UPROPERTY(meta = (BindWidget))
+		UWidgetSwitcher* MenuSwitcher;
+	UPROPERTY(meta = (BindWidget))
+		UWidget* JoinMenu;
+	UPROPERTY(meta = (BindWidget))
+		UWidget* MainMenu;
+	UPROPERTY(meta = (BindWidget))
+		UPanelWidget* ServerList;
 protected:
 	IMenuInterface* MenuInterface;
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-		UButton* HostButton;
-
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-		UButton* JoinMenuButton;
-
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-		UButton* QuitButton;
-
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-		UButton* CancelButton;
-
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-		UButton* JoinButton;
-
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-		UWidgetSwitcher* MenuSwitcher;
-
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-		UWidget* JoinMenu;
-
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-		UWidget* MainMenu;
-
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-		UEditableTextBox* IPAddressText;
 
 	virtual void OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld) override;
 
@@ -60,7 +54,9 @@ protected:
 	UFUNCTION()
 		void OnClick_JoinButton();
 public:
+	UMainMenuWidget(const FObjectInitializer& ObjectIniyializer);
 	virtual bool Initialize() override;
 	void SetMenuInterface(IMenuInterface* NewMenuInterface);
 	void Setup();
+	void SetServerList(TArray<FString> ServerNames);
 };

@@ -20,7 +20,7 @@ APowerupActor::APowerupActor()
 	PowerupInterval = 0.0f;
 	TotalNumOfTicks = 0;
 	TickProcessed = 0;
-	SetReplicates(true);
+	bReplicates = true;
 }
 
 void APowerupActor::OnTickPowerup()
