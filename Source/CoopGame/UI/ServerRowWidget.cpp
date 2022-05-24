@@ -10,9 +10,11 @@ void UServerRowWidget::OnClick_RowButton()
 	Parent->SelectIndex(Index);
 }
 
-void UServerRowWidget::SetServerText(FText Text)
+void UServerRowWidget::SetServerData(FText InServerName, FText InHostUserName, FText InNumOfPlayers)
 {
-	ServerName->SetText(Text);
+	ServerName->SetText(InServerName);
+	HostUserName->SetText(InHostUserName);
+	NumOfPlayers->SetText(InNumOfPlayers);
 }
 
 void UServerRowWidget::Setup(UMainMenuWidget* InParent, int32 InIndex)
@@ -21,5 +23,3 @@ void UServerRowWidget::Setup(UMainMenuWidget* InParent, int32 InIndex)
 	Index = InIndex;
 	RowButton->OnClicked.AddDynamic(this, &UServerRowWidget::OnClick_RowButton);
 }
-
-

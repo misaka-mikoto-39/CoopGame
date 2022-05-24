@@ -10,6 +10,19 @@
 class UButton;
 class UWidgetSwitcher;
 class UEditableTextBox;
+
+USTRUCT()
+struct FServerData
+{
+	GENERATED_BODY()
+
+public:
+	FString ServerName;
+	int32 CurrentPlayers;
+	int32 MaxPlayers;
+	FString HostUserName;
+};
+
 /**
  *
  */
@@ -17,6 +30,7 @@ UCLASS()
 class COOPGAME_API UMainMenuWidget : public UUserWidget
 {
 	GENERATED_BODY()
+
 private:
 	TSubclassOf<UUserWidget> ServerRowClass;
 
@@ -61,6 +75,6 @@ public:
 	virtual bool Initialize() override;
 	void SetMenuInterface(IMenuInterface* NewMenuInterface);
 	void Setup();
-	void SetServerList(TArray<FString> ServerNames);
+	void SetServerList(TArray<FServerData> ServerDatas);
 	void SelectIndex(int32 Index);
 };

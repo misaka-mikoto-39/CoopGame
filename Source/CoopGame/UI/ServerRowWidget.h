@@ -20,9 +20,13 @@ private:
 	int32 Index;
 
 	UPROPERTY()
-	UMainMenuWidget* Parent;
+		UMainMenuWidget* Parent;
 	UPROPERTY(meta = (BindWidget))
 		UTextBlock* ServerName;
+	UPROPERTY(meta = (BindWidget))
+		UTextBlock* HostUserName;
+	UPROPERTY(meta = (BindWidget))
+		UTextBlock* NumOfPlayers;
 	UPROPERTY(meta = (BindWidget))
 		UButton* RowButton;
 
@@ -31,6 +35,6 @@ private:
 public:
 	UPROPERTY(BlueprintReadOnly)
 		bool IsSelected = false;
-	void SetServerText(FText Text);
+	void SetServerData(FText InServerName, FText InHostUserName, FText InNumOfPlayers);
 	void Setup(UMainMenuWidget* Parent, int32 Index);
 };

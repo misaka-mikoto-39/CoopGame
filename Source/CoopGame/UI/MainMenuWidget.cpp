@@ -153,20 +153,20 @@ void UMainMenuWidget::OnClick_JoinButton()
 	}
 }
 
-void UMainMenuWidget::SetServerList(TArray<FString> ServerNames)
+void UMainMenuWidget::SetServerList(TArray<FServerData> ServerDatas)
 {
 	UWorld* World = this->GetWorld();
 	if (World && ServerList)
 	{
 		ServerList->ClearChildren();
-		for (int i = 0; i < ServerNames.Num(); i++)
+		for (int i = 0; i < ServerDatas.Num(); i++)
 		{
 			if (ServerRowClass)
 			{
 				UServerRowWidget* Row = CreateWidget<UServerRowWidget>(World, ServerRowClass);
 				if (Row)
 				{
-					Row->SetServerText(FText::FromString(ServerNames[i]));
+					Row->SetServerData(FText::FromString(ServerDatas[i].ServerName), FText::FromString(ServerDatas[i].HostUserName), FText::FromString(FString::FromInt(ServerDatas[i].CurrentPlayers) + "/" + FString::FromInt(ServerDatas[i].MaxPlayers)));
 					Row->Setup(this, i);
 					ServerList->AddChild(Row);
 				}

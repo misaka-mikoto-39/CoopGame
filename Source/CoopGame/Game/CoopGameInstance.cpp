@@ -110,16 +110,21 @@ void UCoopGameInstance::OnFindSessionComplete(bool IsSuccess)
 	}
 	if (IsSuccess && SessionSearch && MainMenu)
 	{
-		TArray<FString> ServerNames;
+		TArray<FServerData> ServerDatas;
 		TArray<FOnlineSessionSearchResult> SearchResults = SessionSearch->SearchResults;
 		if (SearchResults.Num() > 0)
 		{
 			for (const FOnlineSessionSearchResult& Result : SearchResults)
 			{
-				ServerNames.Add(Result.GetSessionIdStr());
+				FServerData Data;
+				Data.ServerName = Result.GetSessionIdStr();
+				Data.HostUserName = Result.Session.OwningUserName;
+				Data.MaxPlayers = Result.Session.SessionSettings.NumPublicConnections;
+				Data.CurrentPlayers = Data.MaxPlayers - Result.Session.NumOpenPublicConnections;
+				ServerDatas.Add(Data);
 			}
 		}
-		MainMenu->SetServerList(ServerNames);
+		MainMenu->SetServerList(ServerDatas);
 	}
 }
 
@@ -130,14 +135,14 @@ void UCoopGameInstance::OnJoinSessionComplete(FName InSessionName, EOnJoinSessio
 		FString Address;
 		if (SessionInterface->GetResolvedConnectString(InSessionName, Address))
 		{
-			if (GEngine)
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Connect to ")+ Address);
-			}
 			APlayerController* PC = GetFirstLocalPlayerController();
 			if (PC)
 			{
 				PC->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
+			}
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Connect to ") + Address);
 			}
 		}
 	}
