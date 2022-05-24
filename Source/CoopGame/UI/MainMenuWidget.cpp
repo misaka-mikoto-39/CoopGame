@@ -66,6 +66,21 @@ void UMainMenuWidget::Setup()
 	}
 }
 
+void UMainMenuWidget::UpdateChildren()
+{
+	if (ServerList)
+	{
+		for (int i = 0; i < ServerList->GetChildrenCount(); i++)
+		{
+			UServerRowWidget* Row = Cast<UServerRowWidget>(ServerList->GetChildAt(i));
+			if (Row)
+			{
+				Row->IsSelected = (SelectedIndex.IsSet() && SelectedIndex.GetValue() == i);
+			}
+		}
+	}
+}
+
 void UMainMenuWidget::OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld)
 {
 	this->RemoveFromViewport();
@@ -160,7 +175,8 @@ void UMainMenuWidget::SetServerList(TArray<FString> ServerNames)
 	}
 }
 
-void UMainMenuWidget::SelectIndex(uint32 Index)
+void UMainMenuWidget::SelectIndex(int32 Index)
 {
 	SelectedIndex = Index;
+	UpdateChildren();
 }

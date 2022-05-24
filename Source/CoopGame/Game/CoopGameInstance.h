@@ -22,6 +22,7 @@ class COOPGAME_API UCoopGameInstance : public UGameInstance, public IMenuInterfa
 {
 	GENERATED_BODY()
 private:
+	IOnlineSubsystem* OnlineSubsystem;
 	TSubclassOf<UUserWidget> MainMenuClass;
 	TSubclassOf<UUserWidget> IngameMenuClass;
 	IOnlineSessionPtr SessionInterface;
@@ -46,7 +47,7 @@ public:
 	UFUNCTION(Exec)
 		virtual void Host() override;
 	UFUNCTION(Exec)
-		virtual void Join(uint32 Index) override;
+		virtual void Join(int32 Index) override;
 	UFUNCTION(Exec)
 		virtual void Leave() override;
 };

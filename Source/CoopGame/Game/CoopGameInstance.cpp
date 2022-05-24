@@ -26,14 +26,14 @@ UCoopGameInstance::UCoopGameInstance(const FObjectInitializer& ObjectIniyializer
 
 void UCoopGameInstance::Init()
 {
-	IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
-	if (Subsystem)
+	OnlineSubsystem = IOnlineSubsystem::Get();
+	if (OnlineSubsystem)
 	{
 		if (GEngine)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Subsystem: ") + Subsystem->GetSubsystemName().ToString() + TEXT(" Platform: ") + Subsystem->GetLocalPlatformName());
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Subsystem: ") + OnlineSubsystem->GetSubsystemName().ToString() + TEXT(" Platform: ") + OnlineSubsystem->GetLocalPlatformName());
 		}
-		SessionInterface = Subsystem->GetSessionInterface();
+		SessionInterface = OnlineSubsystem->GetSessionInterface();
 		if (SessionInterface)
 		{
 			SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UCoopGameInstance::OnCreateSessionComplete);
@@ -66,7 +66,14 @@ void UCoopGameInstance::CreateSession(FName InSessionName)
 	if (SessionInterface)
 	{
 		FOnlineSessionSettings SessionSettings;
-		SessionSettings.bIsLANMatch = false;
+		if (OnlineSubsystem && OnlineSubsystem->GetSubsystemName() == "NULL")
+		{
+			SessionSettings.bIsLANMatch = true;
+		}
+		else
+		{
+			SessionSettings.bIsLANMatch = false;
+		}
 		SessionSettings.NumPublicConnections = 2;
 		SessionSettings.bShouldAdvertise = true;
 		SessionSettings.bUsesPresence = true;
@@ -103,16 +110,16 @@ void UCoopGameInstance::OnFindSessionComplete(bool IsSuccess)
 	}
 	if (IsSuccess && SessionSearch && MainMenu)
 	{
+		TArray<FString> ServerNames;
 		TArray<FOnlineSessionSearchResult> SearchResults = SessionSearch->SearchResults;
 		if (SearchResults.Num() > 0)
 		{
-			TArray<FString> ServerNames;
 			for (const FOnlineSessionSearchResult& Result : SearchResults)
 			{
 				ServerNames.Add(Result.GetSessionIdStr());
 			}
-			MainMenu->SetServerList(ServerNames);
 		}
+		MainMenu->SetServerList(ServerNames);
 	}
 }
 
@@ -178,15 +185,22 @@ void UCoopGameInstance::Host()
 	}
 }
 
-void UCoopGameInstance::Join(uint32 Index)
+void UCoopGameInstance::Join(int32 Index)
 {
-	if (GEngine)
+	if (SessionInterface && SessionSearch && SessionSearch->SearchResults.Num() > 0 && Index < SessionSearch->SearchResults.Num())
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Joining ") + Index);
-	}
-	if (SessionInterface && SessionSearch)
-	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Joining ") + SessionSearch->SearchResults[Index].GetSessionIdStr());
+		}
 		SessionInterface->JoinSession(0, SessionName, SessionSearch->SearchResults[Index]);
+	}
+	else
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Cant join "));
+		}
 	}
 }
 

@@ -15,7 +15,7 @@ void UServerRowWidget::SetServerText(FText Text)
 	ServerName->SetText(Text);
 }
 
-void UServerRowWidget::Setup(UMainMenuWidget* InParent, uint32 InIndex)
+void UServerRowWidget::Setup(UMainMenuWidget* InParent, int32 InIndex)
 {
 	Parent = InParent;
 	Index = InIndex;

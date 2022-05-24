@@ -38,9 +38,11 @@ private:
 		UWidget* MainMenu;
 	UPROPERTY(meta = (BindWidget))
 		UPanelWidget* ServerList;
+
+	void UpdateChildren();
 protected:
 	IMenuInterface* MenuInterface;
-	TOptional<uint32> SelectedIndex;
+	TOptional<int32> SelectedIndex;
 
 	virtual void OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld) override;
 
@@ -60,5 +62,5 @@ public:
 	void SetMenuInterface(IMenuInterface* NewMenuInterface);
 	void Setup();
 	void SetServerList(TArray<FString> ServerNames);
-	void SelectIndex(uint32 Index);
+	void SelectIndex(int32 Index);
 };

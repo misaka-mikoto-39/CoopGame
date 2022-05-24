@@ -17,7 +17,7 @@ class COOPGAME_API UServerRowWidget : public UUserWidget
 {
 	GENERATED_BODY()
 private:
-	uint32 Index;
+	int32 Index;
 
 	UPROPERTY()
 	UMainMenuWidget* Parent;
@@ -25,9 +25,12 @@ private:
 		UTextBlock* ServerName;
 	UPROPERTY(meta = (BindWidget))
 		UButton* RowButton;
+
 	UFUNCTION()
 		void OnClick_RowButton();
 public:
+	UPROPERTY(BlueprintReadOnly)
+		bool IsSelected = false;
 	void SetServerText(FText Text);
-	void Setup(UMainMenuWidget* Parent, uint32 Index);
+	void Setup(UMainMenuWidget* Parent, int32 Index);
 };
