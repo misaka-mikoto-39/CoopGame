@@ -10,7 +10,7 @@ UHealthComponent::UHealthComponent()
 {
 	DefaultHealth = 100;
 	IsDead = false;
-	SetIsReplicated(true);
+	SetIsReplicatedByDefault(true);
 	TeamNum = 255;
 }
 

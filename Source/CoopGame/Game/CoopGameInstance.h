@@ -27,12 +27,13 @@ private:
 	IOnlineSessionPtr SessionInterface;
 	UMainMenuWidget* MainMenu;
 	TSharedPtr<class FOnlineSessionSearch> SessionSearch;
+	FName SessionName = TEXT("MisakaSession");
 
-	void CreateSession(FName SessionName = "My Session Game");
-	void OnCreateSessionComplete(FName SessionName, bool IsSuccess);
-	void OnDestroySessionComplete(FName SessionName, bool IsSuccess);
+	void CreateSession(FName InSessionName);
+	void OnCreateSessionComplete(FName InSessionName, bool IsSuccess);
+	void OnDestroySessionComplete(FName InSessionName, bool IsSuccess);
 	void OnFindSessionComplete(bool IsSuccess);
-	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
+	void OnJoinSessionComplete(FName InSessionName, EOnJoinSessionCompleteResult::Type Result);
 public:
 	UCoopGameInstance(const FObjectInitializer& ObjectIniyializer);
 	virtual void Init() override;

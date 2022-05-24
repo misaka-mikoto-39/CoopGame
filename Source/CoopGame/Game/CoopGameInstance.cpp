@@ -29,6 +29,10 @@ void UCoopGameInstance::Init()
 	IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
 	if (Subsystem)
 	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Subsystem: ") + Subsystem->GetSubsystemName().ToString() + TEXT(" Platform: ") + Subsystem->GetLocalPlatformName());
+		}
 		SessionInterface = Subsystem->GetSessionInterface();
 		if (SessionInterface)
 		{
@@ -42,27 +46,36 @@ void UCoopGameInstance::Init()
 
 void UCoopGameInstance::RefreshServerList()
 {
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("RefreshServerList"));
+	}
 	SessionSearch = MakeShareable(new FOnlineSessionSearch());
 	if (SessionSearch)
 	{
-		SessionSearch->bIsLanQuery = true;
+		//SessionSearch->bIsLanQuery = true;
+		// make sure can find session of this game, because we're using shared AppID
+		SessionSearch->MaxSearchResults = 1000;
+		SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
 		SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
 	}
 }
 
-void UCoopGameInstance::CreateSession(FName SessionName)
+void UCoopGameInstance::CreateSession(FName InSessionName)
 {
 	if (SessionInterface)
 	{
 		FOnlineSessionSettings SessionSettings;
-		SessionSettings.bIsLANMatch = true;
+		SessionSettings.bIsLANMatch = false;
 		SessionSettings.NumPublicConnections = 2;
 		SessionSettings.bShouldAdvertise = true;
-		SessionInterface->CreateSession(0, SessionName, SessionSettings);
+		SessionSettings.bUsesPresence = true;
+		SessionSettings.bUseLobbiesIfAvailable = true;
+		SessionInterface->CreateSession(0, InSessionName, SessionSettings);
 	}
 }
 
-void UCoopGameInstance::OnCreateSessionComplete(FName SessionName, bool IsSuccess)
+void UCoopGameInstance::OnCreateSessionComplete(FName InSessionName, bool IsSuccess)
 {
 	if (IsSuccess)
 	{
@@ -74,16 +87,20 @@ void UCoopGameInstance::OnCreateSessionComplete(FName SessionName, bool IsSucces
 	}
 }
 
-void UCoopGameInstance::OnDestroySessionComplete(FName SessionName, bool IsSuccess)
+void UCoopGameInstance::OnDestroySessionComplete(FName InSessionName, bool IsSuccess)
 {
 	if (IsSuccess)
 	{
-		CreateSession(SessionName);
+		CreateSession(InSessionName);
 	}
 }
 
 void UCoopGameInstance::OnFindSessionComplete(bool IsSuccess)
 {
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("OnFindSessionComplete"));
+	}
 	if (IsSuccess && SessionSearch && MainMenu)
 	{
 		TArray<FOnlineSessionSearchResult> SearchResults = SessionSearch->SearchResults;
@@ -99,12 +116,12 @@ void UCoopGameInstance::OnFindSessionComplete(bool IsSuccess)
 	}
 }
 
-void UCoopGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
+void UCoopGameInstance::OnJoinSessionComplete(FName InSessionName, EOnJoinSessionCompleteResult::Type Result)
 {
 	if (SessionInterface)
 	{
 		FString Address;
-		if (SessionInterface->GetResolvedConnectString(SessionName, Address))
+		if (SessionInterface->GetResolvedConnectString(InSessionName, Address))
 		{
 			if (GEngine)
 			{
@@ -149,7 +166,6 @@ void UCoopGameInstance::Host()
 {
 	if (SessionInterface)
 	{
-		FName SessionName = TEXT("My Session Game");
 		FNamedOnlineSession* ExistingSession = SessionInterface->GetNamedSession(SessionName);
 		if (ExistingSession)
 		{
@@ -170,7 +186,6 @@ void UCoopGameInstance::Join(uint32 Index)
 	}
 	if (SessionInterface && SessionSearch)
 	{
-		FName SessionName = TEXT("My Session Game");
 		SessionInterface->JoinSession(0, SessionName, SessionSearch->SearchResults[Index]);
 	}
 }
