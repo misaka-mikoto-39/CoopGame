@@ -35,6 +35,7 @@ void UCoopGameInstance::Init()
 			SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UCoopGameInstance::OnCreateSessionComplete);
 			SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UCoopGameInstance::OnDestroySessionComplete);
 			SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UCoopGameInstance::OnFindSessionComplete);
+			SessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UCoopGameInstance::OnJoinSessionComplete);
 		}
 	}
 }
@@ -98,6 +99,26 @@ void UCoopGameInstance::OnFindSessionComplete(bool IsSuccess)
 	}
 }
 
+void UCoopGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
+{
+	if (SessionInterface)
+	{
+		FString Address;
+		if (SessionInterface->GetResolvedConnectString(SessionName, Address))
+		{
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Connect to ")+ Address);
+			}
+			APlayerController* PC = GetFirstLocalPlayerController();
+			if (PC)
+			{
+				PC->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
+			}
+		}
+	}
+}
+
 void UCoopGameInstance::LoadMainMenu()
 {
 	if (MainMenuClass)
@@ -141,18 +162,17 @@ void UCoopGameInstance::Host()
 	}
 }
 
-void UCoopGameInstance::Join(const FString& Address)
+void UCoopGameInstance::Join(uint32 Index)
 {
 	if (GEngine)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Joining ") + Address);
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Joining ") + Index);
 	}
-
-	/*APlayerController* PC = GetFirstLocalPlayerController();
-	if (PC)
+	if (SessionInterface && SessionSearch)
 	{
-		PC->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
-	}*/
+		FName SessionName = TEXT("My Session Game");
+		SessionInterface->JoinSession(0, SessionName, SessionSearch->SearchResults[Index]);
+	}
 }
 
 void UCoopGameInstance::Leave()

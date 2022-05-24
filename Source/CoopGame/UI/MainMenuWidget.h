@@ -40,6 +40,7 @@ private:
 		UPanelWidget* ServerList;
 protected:
 	IMenuInterface* MenuInterface;
+	TOptional<uint32> SelectedIndex;
 
 	virtual void OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld) override;
 
@@ -59,4 +60,5 @@ public:
 	void SetMenuInterface(IMenuInterface* NewMenuInterface);
 	void Setup();
 	void SetServerList(TArray<FString> ServerNames);
+	void SelectIndex(uint32 Index);
 };

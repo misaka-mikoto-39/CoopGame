@@ -8,7 +8,12 @@
 #include "CoopGame/UI/MenuInterface.h"
 #include "CoopGameInstance.generated.h"
 
+namespace EOnJoinSessionCompleteResult
+{
+	enum Type;
+}
 class UMainMenuWidget;
+
 /**
  *
  */
@@ -24,13 +29,10 @@ private:
 	TSharedPtr<class FOnlineSessionSearch> SessionSearch;
 
 	void CreateSession(FName SessionName = "My Session Game");
-
-	UFUNCTION()
-		void OnCreateSessionComplete(FName SessionName, bool IsSuccess);
-	UFUNCTION()
-		void OnDestroySessionComplete(FName SessionName, bool IsSuccess);
-	UFUNCTION()
-		void OnFindSessionComplete(bool IsSuccess);
+	void OnCreateSessionComplete(FName SessionName, bool IsSuccess);
+	void OnDestroySessionComplete(FName SessionName, bool IsSuccess);
+	void OnFindSessionComplete(bool IsSuccess);
+	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 public:
 	UCoopGameInstance(const FObjectInitializer& ObjectIniyializer);
 	virtual void Init() override;
@@ -43,7 +45,7 @@ public:
 	UFUNCTION(Exec)
 		virtual void Host() override;
 	UFUNCTION(Exec)
-		virtual void Join(const FString& Address) override;
+		virtual void Join(uint32 Index) override;
 	UFUNCTION(Exec)
 		virtual void Leave() override;
 };

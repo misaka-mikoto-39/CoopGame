@@ -126,7 +126,15 @@ void UMainMenuWidget::OnClick_JoinButton()
 {
 	if (MenuInterface)
 	{
-		MenuInterface->Join("");
+		if (SelectedIndex.IsSet())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Selected Index %d"), SelectedIndex.GetValue());
+			MenuInterface->Join(SelectedIndex.GetValue());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Selected Index not set"))
+		}
 	}
 }
 
@@ -136,17 +144,23 @@ void UMainMenuWidget::SetServerList(TArray<FString> ServerNames)
 	if (World && ServerList)
 	{
 		ServerList->ClearChildren();
-		for (const FString& ServerName : ServerNames)
+		for (int i = 0; i < ServerNames.Num(); i++)
 		{
 			if (ServerRowClass)
 			{
 				UServerRowWidget* Row = CreateWidget<UServerRowWidget>(World, ServerRowClass);
 				if (Row)
 				{
-					Row->SetServerText(FText::FromString(ServerName));
+					Row->SetServerText(FText::FromString(ServerNames[i]));
+					Row->Setup(this, i);
 					ServerList->AddChild(Row);
 				}
 			}
 		}
 	}
+}
+
+void UMainMenuWidget::SelectIndex(uint32 Index)
+{
+	SelectedIndex = Index;
 }
