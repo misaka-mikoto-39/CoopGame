@@ -37,7 +37,7 @@ void AShooterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	//spawn weapon
-	if (GetLocalRole() == ROLE_Authority)
+	if (GetLocalRole() == ROLE_Authority && !CurrentWeapon)
 	{
 		CurrentWeapon = GetWorld()->SpawnActor<AWeapon>(CurrentWeaponClass);
 		if (CurrentWeapon)
