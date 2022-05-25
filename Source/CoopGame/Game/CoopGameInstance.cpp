@@ -190,14 +190,14 @@ void UCoopGameInstance::Host(FString ServerName)
 	DesiredServerName = ServerName;
 	if (SessionInterface)
 	{
-		FNamedOnlineSession* ExistingSession = SessionInterface->GetNamedSession(SessionName);
+		FNamedOnlineSession* ExistingSession = SessionInterface->GetNamedSession(NAME_GameSession);
 		if (ExistingSession)
 		{
-			SessionInterface->DestroySession(SessionName);
+			SessionInterface->DestroySession(NAME_GameSession);
 		}
 		else
 		{
-			CreateSession(SessionName);
+			CreateSession(NAME_GameSession);
 		}
 	}
 }
@@ -210,7 +210,7 @@ void UCoopGameInstance::Join(int32 Index)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Joining ") + SessionSearch->SearchResults[Index].GetSessionIdStr());
 		}
-		SessionInterface->JoinSession(0, SessionName, SessionSearch->SearchResults[Index]);
+		SessionInterface->JoinSession(0, NAME_GameSession, SessionSearch->SearchResults[Index]);
 	}
 	else
 	{

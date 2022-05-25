@@ -28,7 +28,6 @@ private:
 	IOnlineSessionPtr SessionInterface;
 	UMainMenuWidget* MainMenu;
 	TSharedPtr<class FOnlineSessionSearch> SessionSearch;
-	FName SessionName = TEXT("MisakaSession");
 	FString DesiredServerName;
 
 	void CreateSession(FName InSessionName);
