@@ -9,6 +9,8 @@
 #include "CoopGame/UI/MainMenuWidget.h"
 #include "CoopGame/UI/IngameMenuWidget.h"
 
+const static FName SERVER_NAME_SETTING_KEY = TEXT("ServerName");
+
 UCoopGameInstance::UCoopGameInstance(const FObjectInitializer& ObjectIniyializer)
 {
 	ConstructorHelpers::FClassFinder<UUserWidget> MainMenuBPClass(TEXT("/Game/UI/MainMenu/WBP_MainMenu"));
@@ -78,6 +80,7 @@ void UCoopGameInstance::CreateSession(FName InSessionName)
 		SessionSettings.bShouldAdvertise = true;
 		SessionSettings.bUsesPresence = true;
 		SessionSettings.bUseLobbiesIfAvailable = true;
+		SessionSettings.Set(SERVER_NAME_SETTING_KEY, DesiredServerName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 		SessionInterface->CreateSession(0, InSessionName, SessionSettings);
 	}
 }
@@ -117,10 +120,18 @@ void UCoopGameInstance::OnFindSessionComplete(bool IsSuccess)
 			for (const FOnlineSessionSearchResult& Result : SearchResults)
 			{
 				FServerData Data;
-				Data.ServerName = Result.GetSessionIdStr();
 				Data.HostUserName = Result.Session.OwningUserName;
 				Data.MaxPlayers = Result.Session.SessionSettings.NumPublicConnections;
 				Data.CurrentPlayers = Data.MaxPlayers - Result.Session.NumOpenPublicConnections;
+				FString ServerName;
+				if (Result.Session.SessionSettings.Get(SERVER_NAME_SETTING_KEY, ServerName))
+				{
+					Data.ServerName = ServerName;
+				}
+				else
+				{
+					Data.ServerName = Result.GetSessionIdStr();
+				}
 				ServerDatas.Add(Data);
 			}
 		}
@@ -174,8 +185,9 @@ void UCoopGameInstance::LoadIngameMenu()
 	}
 }
 
-void UCoopGameInstance::Host()
+void UCoopGameInstance::Host(FString ServerName)
 {
+	DesiredServerName = ServerName;
 	if (SessionInterface)
 	{
 		FNamedOnlineSession* ExistingSession = SessionInterface->GetNamedSession(SessionName);

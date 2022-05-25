@@ -29,6 +29,7 @@ private:
 	UMainMenuWidget* MainMenu;
 	TSharedPtr<class FOnlineSessionSearch> SessionSearch;
 	FName SessionName = TEXT("MisakaSession");
+	FString DesiredServerName;
 
 	void CreateSession(FName InSessionName);
 	void OnCreateSessionComplete(FName InSessionName, bool IsSuccess);
@@ -45,7 +46,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void LoadIngameMenu();
 	UFUNCTION(Exec)
-		virtual void Host() override;
+		virtual void Host(FString ServerName) override;
 	UFUNCTION(Exec)
 		virtual void Join(int32 Index) override;
 	UFUNCTION(Exec)

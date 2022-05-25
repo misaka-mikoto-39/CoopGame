@@ -37,11 +37,15 @@ private:
 	UPROPERTY(meta = (BindWidget))
 		UButton* HostButton;
 	UPROPERTY(meta = (BindWidget))
+		UButton* HostMenuButton;
+	UPROPERTY(meta = (BindWidget))
 		UButton* JoinMenuButton;
 	UPROPERTY(meta = (BindWidget))
 		UButton* QuitButton;
 	UPROPERTY(meta = (BindWidget))
-		UButton* CancelButton;
+		UButton* CancelButton; 
+	UPROPERTY(meta = (BindWidget))
+		UButton* CancelButton2;
 	UPROPERTY(meta = (BindWidget))
 		UButton* JoinButton;
 	UPROPERTY(meta = (BindWidget))
@@ -49,9 +53,13 @@ private:
 	UPROPERTY(meta = (BindWidget))
 		UWidget* JoinMenu;
 	UPROPERTY(meta = (BindWidget))
+		UWidget* HostMenu;
+	UPROPERTY(meta = (BindWidget))
 		UWidget* MainMenu;
 	UPROPERTY(meta = (BindWidget))
 		UPanelWidget* ServerList;
+	UPROPERTY(meta = (BindWidget))
+		UEditableTextBox* HostName;
 
 	void UpdateChildren();
 protected:
@@ -62,6 +70,8 @@ protected:
 
 	UFUNCTION()
 		void OnClick_HostButton();
+	UFUNCTION()
+		void OnClick_HostMenuButton();
 	UFUNCTION()
 		void OnClick_JoinMenuButton();
 	UFUNCTION()

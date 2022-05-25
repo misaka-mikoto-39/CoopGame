@@ -23,6 +23,10 @@ bool UMainMenuWidget::Initialize()
 	{
 		HostButton->OnClicked.AddDynamic(this, &UMainMenuWidget::OnClick_HostButton);
 	}
+	if (HostMenuButton)
+	{
+		HostMenuButton->OnClicked.AddDynamic(this, &UMainMenuWidget::OnClick_HostMenuButton);
+	}
 	if (JoinMenuButton)
 	{
 		JoinMenuButton->OnClicked.AddDynamic(this, &UMainMenuWidget::OnClick_JoinMenuButton);
@@ -34,6 +38,10 @@ bool UMainMenuWidget::Initialize()
 	if (CancelButton)
 	{
 		CancelButton->OnClicked.AddDynamic(this, &UMainMenuWidget::OnClick_CancelButton);
+	}
+	if (CancelButton2)
+	{
+		CancelButton2->OnClicked.AddDynamic(this, &UMainMenuWidget::OnClick_CancelButton);
 	}
 	if (JoinButton)
 	{
@@ -95,9 +103,20 @@ void UMainMenuWidget::OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld)
 
 void UMainMenuWidget::OnClick_HostButton()
 {
-	if (MenuInterface)
+	if (MenuInterface && HostName)
 	{
-		MenuInterface->Host();
+		MenuInterface->Host(HostName->GetText().ToString());
+	}
+}
+
+void UMainMenuWidget::OnClick_HostMenuButton()
+{
+	if (MenuSwitcher)
+	{
+		if (HostMenu)
+		{
+			MenuSwitcher->SetActiveWidget(HostMenu);
+		}
 	}
 }
 
