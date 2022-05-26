@@ -35,10 +35,12 @@ private:
 	void OnDestroySessionComplete(FName InSessionName, bool IsSuccess);
 	void OnFindSessionComplete(bool IsSuccess);
 	void OnJoinSessionComplete(FName InSessionName, EOnJoinSessionCompleteResult::Type Result);
+	void OnNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString);
 public:
 	UCoopGameInstance(const FObjectInitializer& ObjectIniyializer);
 	virtual void Init() override;
 	virtual void RefreshServerList() override;
+	void StartSession();
 
 	UFUNCTION(BlueprintCallable)
 		void LoadMainMenu();

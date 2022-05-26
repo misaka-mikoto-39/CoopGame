@@ -7,7 +7,7 @@
 #include "ShooterLobbyGameMode.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class COOPGAME_API AShooterLobbyGameMode : public AShooterGameMode
@@ -16,6 +16,10 @@ class COOPGAME_API AShooterLobbyGameMode : public AShooterGameMode
 public:
 	void PostLogin(APlayerController* NewPlayer) override;
 	void Logout(AController* Exiting) override;
+protected:
+	FTimerHandle TimerHandle_StartGame;
 private:
+	UFUNCTION()
+		void StartGame();
 	int32 NumOfPlayers = 0;
 };

@@ -44,6 +44,10 @@ void UCoopGameInstance::Init()
 			SessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UCoopGameInstance::OnJoinSessionComplete);
 		}
 	}
+	if (GEngine)
+	{
+		GEngine->OnNetworkFailure().AddUObject(this, &UCoopGameInstance::OnNetworkFailure);
+	}
 }
 
 void UCoopGameInstance::RefreshServerList()
@@ -63,6 +67,14 @@ void UCoopGameInstance::RefreshServerList()
 	}
 }
 
+void UCoopGameInstance::StartSession()
+{
+	if (SessionInterface)
+	{
+		SessionInterface->StartSession(NAME_GameSession);
+	}
+}
+
 void UCoopGameInstance::CreateSession(FName InSessionName)
 {
 	if (SessionInterface)
@@ -76,7 +88,7 @@ void UCoopGameInstance::CreateSession(FName InSessionName)
 		{
 			SessionSettings.bIsLANMatch = false;
 		}
-		SessionSettings.NumPublicConnections = 2;
+		SessionSettings.NumPublicConnections = 5;
 		SessionSettings.bShouldAdvertise = true;
 		SessionSettings.bUsesPresence = true;
 		SessionSettings.bUseLobbiesIfAvailable = true;
@@ -157,6 +169,11 @@ void UCoopGameInstance::OnJoinSessionComplete(FName InSessionName, EOnJoinSessio
 			}
 		}
 	}
+}
+
+void UCoopGameInstance::OnNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString)
+{
+	LoadMainMenu();
 }
 
 void UCoopGameInstance::LoadMainMenu()
