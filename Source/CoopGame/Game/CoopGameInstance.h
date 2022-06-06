@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "OnlineSubsystem.h"
+#include "OnlineSessionClient.h"
 #include "CoopGame/UI/MenuInterface.h"
 #include "CoopGameInstance.generated.h"
 
@@ -29,6 +30,7 @@ private:
 	UMainMenuWidget* MainMenu;
 	TSharedPtr<class FOnlineSessionSearch> SessionSearch;
 	FString DesiredServerName;
+	//FOnSessionUserInviteAcceptedDelegate SessionInviteAcceptedDelegate;
 
 	void CreateSession(FName InSessionName);
 	void OnCreateSessionComplete(FName InSessionName, bool IsSuccess);
@@ -36,6 +38,7 @@ private:
 	void OnFindSessionComplete(bool IsSuccess);
 	void OnJoinSessionComplete(FName InSessionName, EOnJoinSessionCompleteResult::Type Result);
 	void OnNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString);
+	void OnSessionUserInviteAccepted(bool bWasSuccessful, int32 ControllerId, FUniqueNetIdPtr UserId, const FOnlineSessionSearchResult& SearchResult);
 public:
 	UCoopGameInstance(const FObjectInitializer& ObjectIniyializer);
 	virtual void Init() override;

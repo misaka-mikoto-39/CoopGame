@@ -36,12 +36,16 @@ void UCoopGameInstance::Init()
 			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Subsystem: ") + OnlineSubsystem->GetSubsystemName().ToString() + TEXT(" Platform: ") + OnlineSubsystem->GetLocalPlatformName());
 		}
 		SessionInterface = OnlineSubsystem->GetSessionInterface();
-		if (SessionInterface)
+		//OnlineSessionClient = Cast<UOnlineSessionClient>(this->GetOnlineSession());
+		if (SessionInterface.IsValid())
 		{
 			SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UCoopGameInstance::OnCreateSessionComplete);
 			SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UCoopGameInstance::OnDestroySessionComplete);
 			SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UCoopGameInstance::OnFindSessionComplete);
 			SessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UCoopGameInstance::OnJoinSessionComplete);
+			SessionInterface->OnSessionUserInviteAcceptedDelegates.AddUObject(this, &UCoopGameInstance::OnSessionUserInviteAccepted);
+			//SessionInterface->OnSessionInviteReceivedDelegates.AddUObject(this, &UCoopGameInstance::OnSessionUserInviteAccepted);
+			//SessionInviteAcceptedDelegate.BindUObject(this, &UCoopGameInstance::OnSessionUserInviteAccepted);
 		}
 	}
 	if (GEngine)
@@ -92,6 +96,9 @@ void UCoopGameInstance::CreateSession(FName InSessionName)
 		SessionSettings.bShouldAdvertise = true;
 		SessionSettings.bUsesPresence = true;
 		SessionSettings.bUseLobbiesIfAvailable = true;
+		SessionSettings.NumPrivateConnections = 2;
+		SessionSettings.bAllowJoinViaPresenceFriendsOnly = true;
+		SessionSettings.bAllowInvites = true;
 		SessionSettings.Set(SERVER_NAME_SETTING_KEY, DesiredServerName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 		SessionInterface->CreateSession(0, InSessionName, SessionSettings);
 	}
@@ -248,5 +255,24 @@ void UCoopGameInstance::Leave()
 	if (PC)
 	{
 		PC->ClientTravel("/Game/UI/MainMenu/MainMenu", ETravelType::TRAVEL_Absolute);
+	}
+}
+
+void UCoopGameInstance::OnSessionUserInviteAccepted(bool bWasSuccessful, int32 ControllerId, FUniqueNetIdPtr UserId, const FOnlineSessionSearchResult& SearchResult)
+{
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("OnSessionUserInviteAccepted"));
+	}
+	if (bWasSuccessful)
+	{
+		if (SearchResult.IsValid())
+		{
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("OnSessionUserInviteAccepted"));
+			}
+			SessionInterface->JoinSession(*UserId, NAME_GameSession, SearchResult);
+		}
 	}
 }
