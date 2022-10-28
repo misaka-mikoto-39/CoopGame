@@ -8,8 +8,13 @@ public class CoopGame : ModuleRules
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "PhysicsCore", "UMG", "AIModule", "NavigationSystem", "OnlineSubsystem", "OnlineSubsystemSteam" });
+        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "PhysicsCore", "UMG", "AIModule", "NavigationSystem", "OnlineSubsystem" });
 
+        // Steam Online subsystem
+        //PublicDependencyModuleNames.Add("OnlineSubsystemSteam");
+
+        // EOS (Epic Online Service) Online subsystem
+        PublicDependencyModuleNames.Add("OnlineSubsystemEOS");
         PrivateDependencyModuleNames.AddRange(new string[] { });
 
         // Uncomment if you are using Slate UI PrivateDependencyModuleNames.AddRange(new string[] {

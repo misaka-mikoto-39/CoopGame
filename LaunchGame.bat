@@ -1,0 +1,1 @@
+"D:\UE\UE5\Engine\Binaries\Win64\UnrealEditor.exe" "%CD%/CoopGame.uproject" -game -log
