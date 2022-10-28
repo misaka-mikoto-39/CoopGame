@@ -288,12 +288,15 @@ void UCoopGameInstance::Login()
 		IdentityInterface = OnlineSubsystem->GetIdentityInterface();
 		if (IdentityInterface)
 		{
-			FOnlineAccountCredentials Credential;
-			Credential.Id = FString();
-			Credential.Token = FString();
-			Credential.Type = FString("accountportal");
 			IdentityInterface->OnLoginCompleteDelegates->AddUObject(this, &UCoopGameInstance::OnLoginCompleted);
-			IdentityInterface->Login(0, Credential);
+			if (!IdentityInterface->AutoLogin(0))// try logs the player into the online service using parameters passed on the command line. -AUTH_LOGIN=<UserName> -AUTH_PASSWORD=<password> -AUTH_TYPE=<type>
+			{
+				FOnlineAccountCredentials Credential;
+				Credential.Id = FString();
+				Credential.Token = FString();
+				Credential.Type = FString("accountportal"); //-accountportal: open browser and login. -developer: require EOS Developer Authentication Tool(Dev Auth Tool). -exchangecode: should only be used if the application is being launched from the Epic Launcher (use with shipping, exchange code provided by the Epic Launcher)
+				IdentityInterface->Login(0, Credential);
+			}
 		}
 	}
 }
