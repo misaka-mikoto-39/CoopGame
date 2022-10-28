@@ -27,11 +27,12 @@ private:
 	TSubclassOf<UUserWidget> MainMenuClass;
 	TSubclassOf<UUserWidget> IngameMenuClass;
 	IOnlineSessionPtr SessionInterface;
+	IOnlineIdentityPtr IdentityInterface;
 	UMainMenuWidget* MainMenu;
 	TSharedPtr<class FOnlineSessionSearch> SessionSearch;
 	FString DesiredServerName;
-	//FOnSessionUserInviteAcceptedDelegate SessionInviteAcceptedDelegate;
 
+	//FOnSessionUserInviteAcceptedDelegate SessionInviteAcceptedDelegate;
 	void CreateSession(FName InSessionName);
 	void OnCreateSessionComplete(FName InSessionName, bool IsSuccess);
 	void OnDestroySessionComplete(FName InSessionName, bool IsSuccess);
@@ -39,11 +40,13 @@ private:
 	void OnJoinSessionComplete(FName InSessionName, EOnJoinSessionCompleteResult::Type Result);
 	void OnNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString);
 	void OnSessionUserInviteAccepted(bool bWasSuccessful, int32 ControllerId, FUniqueNetIdPtr UserId, const FOnlineSessionSearchResult& SearchResult);
+	void OnLoginCompleted(int LocalUserNum, bool bWasSuccessful, const FUniqueNetId& UserId, const FString& Error);
 public:
 	UCoopGameInstance(const FObjectInitializer& ObjectIniyializer);
 	virtual void Init() override;
 	virtual void RefreshServerList() override;
 	void StartSession();
+	void Login();
 
 	UFUNCTION(BlueprintCallable)
 		void LoadMainMenu();

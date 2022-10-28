@@ -5,6 +5,8 @@
 #include "GameFramework/GameUserSettings.h"
 #include "OnlineSessionSettings.h"
 #include "Interfaces/OnlineSessionInterface.h"
+#include "Interfaces/OnlineIdentityInterface.h"
+#include "Interfaces/OnlineExternalUIInterface.h"
 
 #include "CoopGame/UI/MainMenuWidget.h"
 #include "CoopGame/UI/IngameMenuWidget.h"
@@ -35,6 +37,7 @@ void UCoopGameInstance::Init()
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT("Subsystem: ") + OnlineSubsystem->GetSubsystemName().ToString() + TEXT(" Platform: ") + OnlineSubsystem->GetLocalPlatformName());
 		}
+		Login();
 		SessionInterface = OnlineSubsystem->GetSessionInterface();
 		//OnlineSessionClient = Cast<UOnlineSessionClient>(this->GetOnlineSession());
 		if (SessionInterface.IsValid())
@@ -274,5 +277,32 @@ void UCoopGameInstance::OnSessionUserInviteAccepted(bool bWasSuccessful, int32 C
 			}
 			SessionInterface->JoinSession(*UserId, NAME_GameSession, SearchResult);
 		}
+	}
+}
+
+void UCoopGameInstance::Login()
+{
+	//current working for EOS
+	if (OnlineSubsystem && OnlineSubsystem->GetSubsystemName() == EOS_SUBSYSTEM)
+	{
+		IdentityInterface = OnlineSubsystem->GetIdentityInterface();
+		if (IdentityInterface)
+		{
+			FOnlineAccountCredentials Credential;
+			Credential.Id = FString();
+			Credential.Token = FString();
+			Credential.Type = FString("accountportal");
+			IdentityInterface->OnLoginCompleteDelegates->AddUObject(this, &UCoopGameInstance::OnLoginCompleted);
+			IdentityInterface->Login(0, Credential);
+		}
+	}
+}
+
+void UCoopGameInstance::OnLoginCompleted(int LocalUserNum, bool bWasSuccessful, const FUniqueNetId& UserId, const FString& Error)
+{
+	if (IdentityInterface && bWasSuccessful)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Login %s, Error: %s"), *UserId.ToString(), *Error);
+		IdentityInterface->ClearOnLoginCompleteDelegates(0, this);
 	}
 }
