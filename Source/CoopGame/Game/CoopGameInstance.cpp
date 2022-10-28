@@ -291,6 +291,7 @@ void UCoopGameInstance::Login()
 			IdentityInterface->OnLoginCompleteDelegates->AddUObject(this, &UCoopGameInstance::OnLoginCompleted);
 			if (!IdentityInterface->AutoLogin(0))// try logs the player into the online service using parameters passed on the command line. -AUTH_LOGIN=<UserName> -AUTH_PASSWORD=<password> -AUTH_TYPE=<type>
 			{
+				UE_LOG(LogTemp, Warning, TEXT("Auto login failed, try login with account portal"));
 				FOnlineAccountCredentials Credential;
 				Credential.Id = FString();
 				Credential.Token = FString();
