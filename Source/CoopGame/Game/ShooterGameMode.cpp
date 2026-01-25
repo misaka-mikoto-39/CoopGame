@@ -4,6 +4,7 @@
 #include "CoopGame/Components/HealthComponent.h"
 #include "ShooterGameState.h"
 #include "ShooterPlayerState.h"
+#include "EngineUtils.h"
 
 AShooterGameMode::AShooterGameMode()
 {
@@ -54,10 +55,11 @@ void AShooterGameMode::CheckWaveState()
 		return;
 	}
 	bool IsAnyBotAlive = false;
-	for (auto it = GetWorld()->GetPawnIterator(); it; ++it)
+	for (TActorIterator<APawn> TestPawn(GetWorld()); TestPawn; ++TestPawn)
+	//for (auto it = GetWorld()->GetPawnIterator(); it; ++it)
 	{
-		APawn* TestPawn = it->Get();
-		if (TestPawn == nullptr || TestPawn->IsPlayerControlled())
+		//APawn* TestPawn = it->Get();
+		if (/*TestPawn == nullptr ||*/ TestPawn->IsPlayerControlled())
 		{
 			continue;
 		}

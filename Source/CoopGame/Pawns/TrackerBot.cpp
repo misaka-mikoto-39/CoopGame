@@ -9,6 +9,7 @@
 #include "CoopGame/Character/ShooterCharacter.h"
 #include "Components/SphereComponent.h"
 #include "Sound/SoundCue.h"
+#include "EngineUtils.h"
 
 // Sets default values
 ATrackerBot::ATrackerBot()
@@ -56,10 +57,12 @@ FVector ATrackerBot::GetNextPathPoint()
 {
 	AActor* NearestTarget = nullptr;
 	float NearestDistance = FLT_MAX;
-	for (auto it = GetWorld()->GetPawnIterator(); it; ++it)
+	//for (auto it = GetWorld()->GetPawnIterator(); it; ++it)
+
+	for (TActorIterator<APawn> TestPawn(GetWorld()); TestPawn; ++TestPawn)
 	{
-		APawn* TestPawn = it->Get();
-		if (TestPawn == nullptr || UHealthComponent::IsFriendly(this, TestPawn))
+		//APawn* TestPawn = it->Get();
+		if (/*TestPawn == nullptr ||*/ UHealthComponent::IsFriendly(this, *TestPawn))
 		{
 			continue;
 		}
@@ -67,7 +70,7 @@ FVector ATrackerBot::GetNextPathPoint()
 		if (DistanceCheck < NearestDistance)
 		{
 			NearestDistance = DistanceCheck;
-			NearestTarget = TestPawn;
+			NearestTarget = *TestPawn;
 		}
 	}
 	if (NearestTarget)
